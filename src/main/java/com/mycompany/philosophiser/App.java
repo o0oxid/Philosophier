@@ -5,7 +5,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        int numberOfPhilosophers = 10;
+        int numberOfPhilosophers = 10000;
         Philosopher[] philosophers = new Philosopher[numberOfPhilosophers];
         Fork[] forks = new Fork[numberOfPhilosophers];
         Thread[] lunch = new Thread[numberOfPhilosophers];

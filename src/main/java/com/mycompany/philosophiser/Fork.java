@@ -2,15 +2,18 @@ package com.mycompany.philosophiser;
 
 
 public class Fork {
-    private Philosopher owner = null;
-    public synchronized boolean setOwner( Philosopher p) {
+    private volatile Philosopher owner = null;
+    public void setOwner( Philosopher p) {
         if (owner == null) {
-            owner = p;
-            return true;
+            synchronized (this) {
+                if (owner == null) {
+                    owner = p;
+                }
+            }
         }
-        return false;
     }
-    public synchronized Philosopher getOwner() {
+
+    public Philosopher getOwner() {
         return owner;
     }
 }
