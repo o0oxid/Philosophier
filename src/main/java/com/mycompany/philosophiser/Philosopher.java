@@ -5,7 +5,7 @@ public class Philosopher implements Runnable {
     private static String happyPhilosopher = "(͡° ͜ʖ ͡°)";
     private static String leftForkFace = "ψ(⌣́_⌣̀)";
     private static String rightForkFace = "(⌣́_⌣̀)ψ";
-    private static String allForksFace = "ψ͡(° ͜ʖ ͡°)ψ";
+    private static String allForksFace = "ψ(͡° ͜ʖ ͡°)ψ";
     private Fork rightFork=null;
     private Fork leftFork=null;
 
@@ -15,8 +15,29 @@ public class Philosopher implements Runnable {
     }
 
     public void run() {
-        rightFork.setOwner(this);
-        leftFork.setOwner(this);
+        long threadId = Thread.currentThread().getId();
+        System.out.println("Hi, I'm owner number " + threadId);
+        String philosopherMessage = threadId + ": " + allForksFace;
+        try {
+            while(true) {
+                rightFork.setOwner(this);
+                leftFork.setOwner(this);
+                if ((rightFork.getOwner() == this) && (leftFork.getOwner() == this)) {
+                    //got both forks
+                    System.out.println(philosopherMessage);
+                    Thread.sleep(100);
+                    rightFork.releaseOwner(this);
+                    leftFork.releaseOwner(this);
+                } else {
+                    //No luck, but release fork to avoid deadlocks
+                    rightFork.releaseOwner(this);
+                    leftFork.releaseOwner(this);
+                }
+                Thread.sleep(50);
+            }
+    } catch (InterruptedException e) {}
+
+
     }
 
     public String toString() {
