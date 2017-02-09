@@ -1,29 +1,7 @@
 package com.mycompany.philosophiser;
 
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Fork {
-    private volatile Philosopher owner = null;
-    public void setOwner( Philosopher p) {
-        if (owner == null) {
-            synchronized (this) {
-                if (owner == null) {
-                    owner = p;
-                }
-            }
-        }
-    }
-
-    public void releaseOwner(Philosopher p) {
-        if (owner == p) {
-            synchronized (this) {
-                if (owner == p) {
-                    owner = null;
-                }
-            }
-        }
-    }
-
-    public Philosopher getOwner() {
-        return owner;
-    }
+    public final ReentrantLock lock = new ReentrantLock();
 }

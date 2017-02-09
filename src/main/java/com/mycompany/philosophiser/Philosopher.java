@@ -1,59 +1,72 @@
 package com.mycompany.philosophiser;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class Philosopher implements Runnable {
-    private static String sadPhilosopher = "(⌣́_⌣̀)";
-    private static String happyPhilosopher = "(͡° ͜ʖ ͡°)";
-    private static String leftForkFace = "ψ(⌣́_⌣̀)";
-    private static String rightForkFace = "(⌣́_⌣̀)ψ";
     private static String allForksFace = "ψ(͡° ͜ʖ ͡°)ψ";
     private Fork rightFork=null;
     private Fork leftFork=null;
+    private CountDownLatch startSignal;
 
-    public Philosopher(Fork leftFork, Fork rightFork) {
+
+    public Philosopher(Fork leftFork, Fork rightFork, CountDownLatch startSignal) {
         this.leftFork = leftFork;
         this.rightFork = rightFork;
+        this.startSignal = startSignal;
     }
 
     public void run() {
         long threadId = Thread.currentThread().getId();
-        System.out.println("Hi, I'm owner number " + threadId);
+        System.out.println("Hi, I'm number " + threadId);
         String philosopherMessage = threadId + ": " + allForksFace;
+        aWait();
+
+        boolean leftForkFlag = false;
+        boolean rightForkFlag = false;
+
         try {
-            while(true) {
-                rightFork.setOwner(this);
-                leftFork.setOwner(this);
-                if ((rightFork.getOwner() == this) && (leftFork.getOwner() == this)) {
+            while (true) {
+                leftForkFlag = leftFork.lock.tryLock();
+                rightForkFlag = rightFork.lock.tryLock();
+                if (rightForkFlag & leftForkFlag == true) {
                     //got both forks
                     System.out.println(philosopherMessage);
-                    Thread.sleep(100);
-                    rightFork.releaseOwner(this);
-                    leftFork.releaseOwner(this);
-                } else {
-                    //No luck, but release fork to avoid deadlocks
-                    rightFork.releaseOwner(this);
-                    leftFork.releaseOwner(this);
+                    Thread.sleep(300);
                 }
-                Thread.sleep(50);
+                //Release fork to avoid deadlocks
+                if (rightForkFlag) rightFork.lock.unlock();
+                if (leftForkFlag) leftFork.lock.unlock();
+                Thread.sleep(100);
             }
-    } catch (InterruptedException e) {}
-
-
+        } catch (InterruptedException e) {
+            System.out.println(threadId + "'s got interrupted.");
+        } finally {
+            if (rightForkFlag) rightFork.lock.unlock();
+            if (leftForkFlag) leftFork.lock.unlock();
+        }
     }
 
-    public String toString() {
-
-        if ((leftFork == null) ||(rightFork == null)) return happyPhilosopher;
-
-        if ((leftFork.getOwner() == this) && (rightFork.getOwner() == this)) {
-            return allForksFace;
-        }
-        if (leftFork.getOwner() == this )  {
-            return leftForkFace;
-        }
-        if (rightFork.getOwner() == this) {
-            return rightForkFace;
-        }
-        return sadPhilosopher;
+    public Fork getRightFork() {
+        return rightFork;
     }
 
+    public void setRightFork(Fork fork) {
+        rightFork = fork;
+    }
+
+    public Fork getLeftFork() {
+        return leftFork;
+    }
+
+    public void setLeftFork(Fork fork) {
+        leftFork = fork;
+    }
+
+
+    private void aWait() {
+        try {
+            startSignal.await();
+        } catch (InterruptedException e) {}
+    }
 }
