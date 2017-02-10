@@ -1,11 +1,8 @@
 package com.mycompany.philosophiser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 /**
  * Created by okhoruzhenko on 2/5/17.
@@ -45,15 +42,9 @@ public class PhilosopherFactory {
         Tuple leftTuple = getLeftTuple(index);
         Tuple rightTuple = getRightTuple(index);
 
-        // Interrupt everything
-        factory.get(index).thread.interrupt();
-        leftTuple.thread.interrupt();
-        rightTuple.thread.interrupt();
-
         // Remap forks
         leftTuple.philosopher.setRightFork(rightTuple.philosopher.getLeftFork());
-        leftTuple.thread.start();
-        rightTuple.thread.start();
+        factory.get(index).thread.interrupt();
 
         //Delete tuple
         factory.remove(index);
@@ -64,22 +55,15 @@ public class PhilosopherFactory {
         Tuple currentTuple = factory.get(index);
         Tuple leftTuple = getLeftTuple(index);
 
-        currentTuple.thread.interrupt();
-        leftTuple.thread.interrupt();
-
         Fork newFork = new Fork();
-        Philosopher newPhilosopher = new Philosopher(newFork,currentTuple.philosopher.getLeftFork(),startSignal);
+        Philosopher newPhilosopher = new Philosopher(newFork, currentTuple.philosopher.getLeftFork(), startSignal);
 
-        newPhilosopher.setRightFork(currentTuple.philosopher.getLeftFork());
-        newPhilosopher.setLeftFork(newFork);
         leftTuple.philosopher.setRightFork(newFork);
 
         Tuple newTuple = new Tuple(newPhilosopher,new Thread(newPhilosopher));
 
         factory.add(index,newTuple);
 
-        currentTuple.thread.start();
-        leftTuple.thread.start();
         newTuple.thread.start();
     }
 

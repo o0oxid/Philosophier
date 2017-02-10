@@ -9,9 +9,12 @@ public class App
         PhilosopherFactory philosophers = new PhilosopherFactory(numberOfPhilosophers);
         philosophers.run();
         try {
-            Thread.sleep(5000);
+            System.out.println("Let's sleep 5 seconds");
+            Thread.sleep(3000);
+            System.out.println("Add one more philosopher");
             philosophers.add(2);
             Thread.sleep(3000);
+            System.out.println("Remove philosopher");
             philosophers.remove(5);
         } catch (InterruptedException e) {}
 
